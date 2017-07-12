@@ -66,10 +66,6 @@ func (this *ConHash) Get(key string) interface{} {
 	return vnd.Nd.Value
 }
 
-func (this *ConHash) hash(key string) uint32 {
-	return crc32.ChecksumIEEE([]byte(key))
-}
-
 func (this *ConHash) eraseWithoutLock(key string) {
 	nd, exists := this.nodes[key]
 	if !exists {
@@ -121,3 +117,21 @@ func (this *ConHash) lowerBound(hashCode uint32) int {
 	return left
 }
 
+func (this *ConHash) hash(key string) uint32 {
+	return crc32.ChecksumIEEE([]byte(key))
+}
+
+/// 简单的字符串哈希函数，来自《The C Programming Language》
+/*
+inline uint64_t string_hash(char const* str)
+{
+  size_t size = std::strlen(str);
+  uint64_t ret = 0;
+  for (size_t i=0; i<size; ++i)
+  {
+    uint64_t ch = (uint64_t)*str++;
+    ret = ret * 131 + ch;
+  }
+  return ret;
+}
+*/
