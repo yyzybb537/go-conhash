@@ -1,9 +1,28 @@
 package conhash
 
+/*
+#include <stdint.h>
+#include <stdlib.h>
+
+inline uint32_t StringHash(char const* str, int size)
+{
+  uint32_t ret = 0;
+  int i = 0;
+  for (; i<size; ++i)
+  {
+    uint32_t ch = (uint32_t)*str++;
+    ret = ret * 131 + ch;
+  }
+  return ret;
+}
+*/
+import "C"
+import "unsafe"
+
 import (
 	"sync"
 	"fmt"
-	"hash/crc32"
+	"crypto/md5"
 )
 
 type ConHash struct {
@@ -118,20 +137,9 @@ func (this *ConHash) lowerBound(hashCode uint32) int {
 }
 
 func (this *ConHash) hash(key string) uint32 {
-	return crc32.ChecksumIEEE([]byte(key))
+	key = fmt.Sprintf("%x", md5.Sum([]byte(key)))
+	var ckey *C.char = C.CString(key)
+	defer C.free(unsafe.Pointer(ckey))
+	return uint32(C.StringHash(ckey, (C.int)(len(key))))
 }
 
-/// 简单的字符串哈希函数，来自《The C Programming Language》
-/*
-inline uint64_t string_hash(char const* str)
-{
-  size_t size = std::strlen(str);
-  uint64_t ret = 0;
-  for (size_t i=0; i<size; ++i)
-  {
-    uint64_t ch = (uint64_t)*str++;
-    ret = ret * 131 + ch;
-  }
-  return ret;
-}
-*/
